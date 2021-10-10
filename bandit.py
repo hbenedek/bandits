@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import statistics
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,20 +6,39 @@ import matplotlib.pyplot as plt
 class Bandit:
     def __init__(self, k, mu, sigma):
         self.arms = k
+
+    @abstractmethod
+    def take_action(self, action):
+        pass
+
+class SimpleBandit(Bandit):
+    def __init__(self, mu, sigma):
         self.mu = mu
         self.sigma = sigma
         self.expected_rewards = statistics.NormalDist(mu, sigma).samples(k)
         self.rewards = [statistics.NormalDist(mu, 1) for mu in self.expected_rewards]
 
-
     def take_action(self, action):
         return self.rewards[action].samples(1)[0]
+
+class RandomWalkBandit(Bandit):
+    def __init__(self, mu, sigma):
+        self.mu = mu
+        self.sigma = sigma
+
+    def take_action(self, action):
+        pass
+
+
 
 class Agent:
     def __init__(self, k):
         self.arms = k
-        self.estimates = list(np.zeros(k))
-        self.action_history = np.zeros(k)
+
+class EpsilonGreedyAgent(Agent):
+    def __init__(self):
+        self.estimates = list(np.zeros(self.arms))
+        self.action_history = np.zeros(self.arms)
         self.wealth_history = [0]
         self.wealth = 0
         self.average_wealth = [0]
@@ -51,8 +71,10 @@ class Agent:
 
     def plot_result(self):
         plt.plot(np.arange(self.max_iter + 1), self.average_wealth)
-        
-    
+
+class GradientAgent(Agent):
+    def __init__(self):
+        pass    
 
 
 
